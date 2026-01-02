@@ -1,6 +1,25 @@
-.calendar_grid {
+.calendar_grid_text {
     font-family: "Creato Display";
+    font-size: 5mm;
 }
+
+.calendar_grid_line {
+    stroke-width: 1px;
+    stroke:rgb(0,100,0);
+    fill: none
+}
+
 .calendar_label {
     font-family: "Creato Display";
-}   
+    font-size: 12mm
+}
+
+.holiday {
+    stroke:rgb(255,0,0);
+    fill:rgb(255,0,0)
+}
+
+.regular-day {
+    stroke:rgb(0,0,0);
+    fill:rgb(0,0,0)
+}

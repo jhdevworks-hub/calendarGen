@@ -5,4 +5,4 @@
 - [x] Alinear titulo mas arriba.
 - [ ] Agregar calendaritos.
 - [ ] Agregar numero de mes.
-- [ ] Colorear feriados.
+- [x] Colorear feriados.

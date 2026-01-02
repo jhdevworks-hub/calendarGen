@@ -80,10 +80,6 @@ def create_month_grid(
     # Parameters
     day_spacing = mm_to_px(1)
     day_size = (mm_to_px(50), mm_to_px(39))
-    line_color = (0, 100, 0)
-    line_thickness = 1
-    font_color = (0, 0, 0)
-    font_size = 32
     text_offset = (mm_to_px(1), mm_to_px(1))
 
     days_in_month = current_month.n_days
@@ -135,29 +131,26 @@ def create_month_grid(
         end_point = (cell_right, cell_top + day_spacing)
 
         opacity = 1.0 if not off_month else 0.6
-        line_full_color = svgwrite.rgb(*line_color, "rgb")
 
         line = Polyline(
             [start_point, corner_point, end_point],
-            stroke=line_full_color,
-            stroke_width=line_thickness,
             stroke_opacity=opacity,
-            fill="none",
             opacity=opacity,
+            class_="calendar_grid_line",
         )
-
-        font_full_color = svgwrite.rgb(*font_color, "rgb")
 
         number = Text(
             str(day_number),
             x=[cell_left + text_offset[0]],
             y=[cell_top + text_offset[1]],
-            stroke=font_full_color,
             stroke_opacity=opacity,
-            fill=font_full_color,
             fill_opacity=opacity,
-            font_size=font_size,
             dominant_baseline="hanging",
+            class_=(
+                "calendar_grid_text regular-day"
+                if not holiday
+                else "calendar_grid_text holiday"
+            ),
         )
         group.add(line)
         group.add(number)
@@ -195,26 +188,22 @@ def create_month_grid(
             cell_top + day_spacing + diagonal_spacing,
         )
 
-        line_full_color = svgwrite.rgb(*line_color, "rgb")
-
         line = Polyline(
             [start_point, end_point],
-            stroke=line_full_color,
-            stroke_width=line_thickness,
-            fill="none",
+            class_="calendar_grid_line",
         )
-
-        font_full_color = svgwrite.rgb(*font_color, "rgb")
 
         number = Text(
             str(day_number),
             x=[cell_right - text_offset[0]],
             y=[cell_bottom - text_offset[1]],
-            stroke=font_full_color,
-            fill=font_full_color,
-            font_size=font_size,
             dominant_baseline="alphabetic",
             text_anchor="end",
+            class_=(
+                "calendar_grid_text regular-day"
+                if not holiday
+                else "calendar_grid_text holiday"
+            ),
         )
         group.add(line)
         group.add(number)
@@ -233,16 +222,16 @@ def create_month_grid(
         )
 
     # Add month days
-    for day_number in range(fitting_days_in_month):
+    for day_index in range(fitting_days_in_month):
         make_day_cell(
             grid_group,
-            day_number + month_day_start_index,
-            day_number + 1,
+            day_index + month_day_start_index,
+            day_index + 1,
             day_size,
             day_spacing,
             text_offset,
             False,
-            True if day_number in current_month.holidays else False,
+            True if (day_index + 1) in current_month.holidays else False,
         )
 
     # Add previous month days
@@ -280,7 +269,7 @@ def create_month_grid(
                     day_spacing,
                     text_offset,
                     True,
-                    True if day_number in next_month.holidays else False,
+                    True if next_day_number in next_month.holidays else False,
                 )
     else:
         # Add missing month days with a diagonal line.
@@ -310,7 +299,6 @@ if __name__ == "__main__":
     grid_anchor = (mm_to_px(20), mm_to_px(66))
     month_label_anchor = (mm_to_px(20), mm_to_px(40))
     label_color = svgwrite.rgb(0, 0, 0, "rgb")
-    label_size = 48
 
     # Load stylesheet
     css_path = "calendar.css"
@@ -359,7 +347,6 @@ if __name__ == "__main__":
             y=[month_label_anchor[1]],
             stroke=label_color,
             fill=label_color,
-            font_size=label_size,
             dominant_baseline="alphabetic",
             class_="calendar_label",
         )

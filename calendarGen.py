@@ -7,12 +7,11 @@ import sys
 
 
 def create_month_grid(
-    dwg, grid_anchor, days_in_month, month_day_start_index, days_in_previous_month
+    grid_anchor, days_in_month, month_day_start_index, days_in_previous_month
 ):
     """
     Create the grid for a full month, plus the previous/next months' days if they fit.
 
-    :param dwg: Drawing object where to draw.
     :param grid_anchor: Anchor position in the drawing, in px.
     :param days_in_month: Amount of days in the current month.
     :param month_day_start_index: Index for the first day of the month. 0 for Monday, 6 for Sunday.
@@ -33,11 +32,13 @@ def create_month_grid(
         f"days_in_previous_month: {days_in_previous_month}"
     )
 
-    def make_day_cell(dwg, grid_index, day_number, day_size, day_spacing, off_month):
+    grid_group = svgwrite.container.Group()
+
+    def make_day_cell(group, grid_index, day_number, day_size, day_spacing, off_month):
         """
         Make a cell for a single day.
 
-        :param dwg: Drawing object where to draw.
+        :param group: Group container for the day cell.
         :param grid_index: Index of the day to add. From 0 to 34.
         :param day_number: Number for the day.
         :param day_size: Size of the day cell, in px.
@@ -85,14 +86,14 @@ def create_month_grid(
             font_size=font_size,
             dominant_baseline="hanging",
         )
-        dwg.add(line)
-        dwg.add(number)
+        group.add(line)
+        group.add(number)
 
-    def make_extra_day_halfcell(dwg, grid_index, day_number, day_size, day_spacing):
+    def make_extra_day_halfcell(group, grid_index, day_number, day_size, day_spacing):
         """
         Make a half-day inside another day cell. Used for days that don't fit in the 5 week rows.
 
-        :param dwg: Drawing object where to draw.
+        :param group: Group container for the half-day objects.
         :param grid_index: Index of the day to add. From 0 to 34.
         :param day_number: Number for the day.
         :param day_size: Size of the day cell, in px.
@@ -141,8 +142,8 @@ def create_month_grid(
             dominant_baseline="alphabetic",
             text_anchor="end",
         )
-        dwg.add(line)
-        dwg.add(number)
+        group.add(line)
+        group.add(number)
 
     # Check if all month days fit in the 5 week rows.
     last_day_index = month_day_start_index + days_in_month
@@ -160,7 +161,12 @@ def create_month_grid(
     # Add month days
     for day in range(fitting_days_in_month):
         make_day_cell(
-            dwg, day + month_day_start_index, day + 1, day_size, day_spacing, False
+            grid_group,
+            day + month_day_start_index,
+            day + 1,
+            day_size,
+            day_spacing,
+            False,
         )
 
     # Add previous month days
@@ -169,7 +175,9 @@ def create_month_grid(
         for prev_day in range(
             days_in_previous_month - month_day_start_index, days_in_previous_month
         ):
-            make_day_cell(dwg, day_index, prev_day + 1, day_size, day_spacing, True)
+            make_day_cell(
+                grid_group, day_index, prev_day + 1, day_size, day_spacing, True
+            )
             day_index += 1
 
     if full_month_fits:
@@ -180,15 +188,21 @@ def create_month_grid(
             next_month_day_index = last_day_index + 1
             for next_day in range(1, days_in_next_month + 1):
                 make_day_cell(
-                    dwg, next_month_day_index, next_day, day_size, day_spacing, True
+                    grid_group,
+                    next_month_day_index,
+                    next_day,
+                    day_size,
+                    day_spacing,
+                    True,
                 )
                 next_month_day_index += 1
     else:
         # Add missing month days with a diagonal line.
         index = 28
         for extra_day in range(fitting_days_in_month + 1, days_in_month + 1):
-            make_extra_day_halfcell(dwg, index, extra_day, day_size, day_spacing)
+            make_extra_day_halfcell(grid_group, index, extra_day, day_size, day_spacing)
             index += 1
+    return grid_group
 
 
 if __name__ == "__main__":
@@ -229,12 +243,15 @@ if __name__ == "__main__":
 
         logging.info(f"Creating grid for month {month}")
 
-        create_month_grid(
+        grid_group = create_month_grid(
             dwg,
             grid_anchor,
             month_days[month],
             month_starting_day,
             month_days[month - 1] if (month != 0) else 31,
         )
+        dwg.add(grid_group)
         month_starting_day = (month_starting_day + month_days[month]) % 7
         dwg.save()
+
+    logging.info("Done.")

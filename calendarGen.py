@@ -5,20 +5,77 @@ import logging
 import sys
 
 
+class YearData:
+    def __init__(self, year):
+        self.month_names = [
+            "Enero",
+            "Febrero",
+            "Marzo",
+            "Abril",
+            "Mayo",
+            "Junio",
+            "Julio",
+            "Agosto",
+            "Septiembre",
+            "Octubre",
+            "Noviembre",
+            "Diciembre",
+        ]
+        self.month_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        if year % 4 == 0:
+            self.month_days[1] = 29
+        match year:
+            case 2025:
+                self.year_day_start_index = 2
+            case 2026:
+                self.year_day_start_index = 3
+            case 2027:
+                self.year_day_start_index = 4
+            case _:
+                raise NotImplementedError
+        self.month_starting_day_indexes = [self.year_day_start_index]
+        for i in range(1, 12):
+            self.month_starting_day_indexes.append(
+                (self.month_starting_day_indexes[i - 1] + self.month_days[i - 1]) % 7
+            )
+        # TODO: Add holidays for other years, these are for 2026.
+        self.holidays = {
+            0: [1],
+            1: [],
+            2: [],
+            3: [3, 4, 5],
+            4: [1, 21],
+            5: [21, 29],
+            6: [16],
+            7: [15],
+            8: [18, 19],
+            9: [12, 31],
+            10: [1],
+            11: [8, 25],
+        }
+
+
+class MonthData:
+    def __init__(self, year_data, index):
+        self.n_days = year_data.month_days[index]
+        self.start_index = year_data.month_starting_day_indexes[index]
+        self.holidays = year_data.holidays[index]
+
+
 def mm_to_px(length_in_mm):
     return round(3.543307 * length_in_mm)
 
 
 def create_month_grid(
-    grid_anchor, days_in_month, month_day_start_index, days_in_previous_month
+    grid_anchor,
+    current_month,
+    previous_month,
+    next_month,
 ):
     """
     Create the grid for a full month, plus the previous/next months' days if they fit.
 
     :param grid_anchor: Anchor position in the drawing, in px.
-    :param days_in_month: Amount of days in the current month.
-    :param month_day_start_index: Index for the first day of the month. 0 for Monday, 6 for Sunday.
-    :param days_in_previous_month: Amount of days in the previous month.
     """
     # Parameters
     day_spacing = mm_to_px(1)
@@ -28,6 +85,10 @@ def create_month_grid(
     font_color = (0, 0, 0)
     font_size = 32
     text_offset = (mm_to_px(1), mm_to_px(1))
+
+    days_in_month = current_month.n_days
+    month_day_start_index = current_month.start_index
+    days_in_previous_month = previous_month.n_days
 
     logging.info(
         "Input parameters:\n"
@@ -39,7 +100,14 @@ def create_month_grid(
     grid_group = svgwrite.container.Group(class_="calendar_grid")
 
     def make_day_cell(
-        group, grid_index, day_number, day_size, day_spacing, text_offset, off_month
+        group,
+        grid_index,
+        day_number,
+        day_size,
+        day_spacing,
+        text_offset,
+        off_month,
+        holiday,
     ):
         """
         Make a cell for a single day.
@@ -95,7 +163,7 @@ def create_month_grid(
         group.add(number)
 
     def make_extra_day_halfcell(
-        group, grid_index, day_number, day_size, day_spacing, text_offset
+        group, grid_index, day_number, day_size, day_spacing, text_offset, holiday
     ):
         """
         Make a half-day inside another day cell. Used for days that don't fit in the 5 week rows.
@@ -165,59 +233,69 @@ def create_month_grid(
         )
 
     # Add month days
-    for day in range(fitting_days_in_month):
+    for day_number in range(fitting_days_in_month):
         make_day_cell(
             grid_group,
-            day + month_day_start_index,
-            day + 1,
+            day_number + month_day_start_index,
+            day_number + 1,
             day_size,
             day_spacing,
             text_offset,
             False,
+            True if day_number in current_month.holidays else False,
         )
 
     # Add previous month days
     if month_day_start_index != 0:
-        day_index = 0
-        for prev_day in range(
-            days_in_previous_month - month_day_start_index, days_in_previous_month
+        for day_index, day_number in enumerate(
+            range(
+                days_in_previous_month - month_day_start_index + 1,
+                days_in_previous_month + 1,
+            )
         ):
             make_day_cell(
                 grid_group,
                 day_index,
-                prev_day + 1,
+                day_number,
                 day_size,
                 day_spacing,
                 text_offset,
                 True,
+                True if day_number in previous_month.holidays else False,
             )
-            day_index += 1
 
     if full_month_fits:
         last_day_index = month_day_start_index + (days_in_month - 1)
         days_in_next_month = 7 - ((last_day_index + 1) % 7)
         # Add next month days
         if days_in_next_month != 7:
-            next_month_day_index = last_day_index + 1
-            for next_day in range(1, days_in_next_month + 1):
+            for next_month_day_index, next_day_number in enumerate(
+                range(1, days_in_next_month + 1), last_day_index + 1
+            ):
                 make_day_cell(
                     grid_group,
                     next_month_day_index,
-                    next_day,
+                    next_day_number,
                     day_size,
                     day_spacing,
                     text_offset,
                     True,
+                    True if day_number in next_month.holidays else False,
                 )
-                next_month_day_index += 1
     else:
         # Add missing month days with a diagonal line.
-        index = 28
-        for extra_day in range(fitting_days_in_month + 1, days_in_month + 1):
+        for index, extra_day_number in enumerate(
+            range(fitting_days_in_month + 1, days_in_month + 1), 28
+        ):
             make_extra_day_halfcell(
-                grid_group, index, extra_day, day_size, day_spacing, text_offset
+                grid_group,
+                index,
+                extra_day_number,
+                day_size,
+                day_spacing,
+                text_offset,
+                True if extra_day_number in current_month.holidays else False,
             )
-            index += 1
     return grid_group
 
 
@@ -234,30 +312,15 @@ if __name__ == "__main__":
     label_color = svgwrite.rgb(0, 0, 0, "rgb")
     label_size = 48
 
-    month_names = [
-        "Enero",
-        "Febrero",
-        "Marzo",
-        "Abril",
-        "Mayo",
-        "Junio",
-        "Julio",
-        "Agosto",
-        "Septiembre",
-        "Octubre",
-        "Noviembre",
-        "Diciembre",
-    ]
-    month_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-
-    year_day_start = 3  # 2026 starts on Thursday
-    month_starting_day = year_day_start
-
     # Load stylesheet
     css_path = "calendar.css"
     with open(css_path, "r") as file:
         stylesheet = file.read()
 
+    # Prepare year data before loop
+    year_2025 = YearData(2025)
+    year_2026 = YearData(2026)
+    year_2027 = YearData(2027)
     for month_index in range(12):
         dwg = svgwrite.Drawing(
             f"test_month_{month_index}.svg", size=("380mm", "265mm"), profile="full"
@@ -274,15 +337,24 @@ if __name__ == "__main__":
 
         logging.info(f"Creating grid for month {month_index}")
 
+        previous_month_data = (
+            MonthData(year_2026, month_index - 1)
+            if month_index != 0
+            else MonthData(year_2025, 11)
+        )
+        current_month_data = MonthData(year_2026, month_index)
+        next_month_data = (
+            MonthData(year_2026, month_index + 1)
+            if month_index != 11
+            else MonthData(year_2027, 0)
+        )
+
         grid_group = create_month_grid(
-            grid_anchor,
-            month_days[month_index],
-            month_starting_day,
-            month_days[month_index - 1] if (month_index != 0) else 31,
+            grid_anchor, current_month_data, previous_month_data, next_month_data
         )
 
         month_label = Text(
-            month_names[month_index],
+            year_2026.month_names[month_index],
             x=[month_label_anchor[0]],
             y=[month_label_anchor[1]],
             stroke=label_color,
@@ -293,7 +365,6 @@ if __name__ == "__main__":
         )
         dwg.add(grid_group)
         dwg.add(month_label)
-        month_starting_day = (month_starting_day + month_days[month_index]) % 7
         dwg.save()
 
     logging.info("Done.")

@@ -33,7 +33,7 @@ def create_month_grid(
         f"days_in_previous_month: {days_in_previous_month}"
     )
 
-    grid_group = svgwrite.container.Group()
+    grid_group = svgwrite.container.Group(class_="calendar_grid")
 
     def make_day_cell(
         group, grid_index, day_number, day_size, day_spacing, text_offset, off_month
@@ -247,10 +247,18 @@ if __name__ == "__main__":
 
     year_day_start = 3  # 2026 starts on Thursday
     month_starting_day = year_day_start
+
+    # Load stylesheet
+    css_path = "calendar.css"
+    with open(css_path, "r") as file:
+        stylesheet = file.read()
+
     for month_index in range(12):
         dwg = svgwrite.Drawing(
             f"test_month_{month_index}.svg", size=("380mm", "265mm"), profile="full"
         )
+        dwg.embed_font(name="Indie Flower", filename="fonts/IndieFlower-Regular.ttf")
+        dwg.embed_stylesheet(stylesheet)
         dwg.add(
             dwg.rect(
                 insert=(0, 0), size=("100%", "100%"), rx=None, ry=None, fill="#efeeea"
@@ -274,6 +282,7 @@ if __name__ == "__main__":
             fill=label_color,
             font_size=label_size,
             dominant_baseline="alphabetic",
+            class_="calendar_label",
         )
         dwg.add(grid_group)
         dwg.add(month_label)

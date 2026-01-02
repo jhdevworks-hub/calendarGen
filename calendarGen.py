@@ -22,7 +22,7 @@ def create_month_grid(
     """
     # Parameters
     day_spacing = mm_to_px(1)
-    day_size = (mm_to_px(48), mm_to_px(38))
+    day_size = (mm_to_px(50), mm_to_px(39))
     line_color = (0, 100, 0)
     line_thickness = 1
     font_color = (0, 0, 0)
@@ -229,10 +229,10 @@ if __name__ == "__main__":
     )
 
     # Parameters
-    grid_anchor = (mm_to_px(20), mm_to_px(62))
-    month_label_anchor = (mm_to_px(20), mm_to_px(37))
+    grid_anchor = (mm_to_px(20), mm_to_px(66))
+    month_label_anchor = (mm_to_px(20), mm_to_px(40))
     label_color = svgwrite.rgb(0, 0, 0, "rgb")
-    label_size = 72
+    label_size = 48
 
     month_names = [
         "Enero",

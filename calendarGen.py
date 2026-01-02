@@ -1,9 +1,12 @@
 import svgwrite
-from svgwrite import px
 from svgwrite.shapes import Polyline
 from svgwrite.text import Text
 import logging
 import sys
+
+
+def mm_to_px(length_in_mm):
+    return round(3.543307 * length_in_mm)
 
 
 def create_month_grid(
@@ -18,13 +21,13 @@ def create_month_grid(
     :param days_in_previous_month: Amount of days in the previous month.
     """
     # Parameters
-    day_spacing = 10
-    day_size = (180, 143)
+    day_spacing = mm_to_px(1)
+    day_size = (mm_to_px(48), mm_to_px(38))
     line_color = (0, 100, 0)
     line_thickness = 1
     font_color = (0, 0, 0)
     font_size = 32
-    text_offset = (5, 5)
+    text_offset = (mm_to_px(1), mm_to_px(1))
 
     logging.info(
         "Input parameters:\n"
@@ -226,8 +229,8 @@ if __name__ == "__main__":
     )
 
     # Parameters
-    grid_anchor = (30, 150)
-    month_label_anchor = (30, 100)
+    grid_anchor = (mm_to_px(20), mm_to_px(62))
+    month_label_anchor = (mm_to_px(20), mm_to_px(37))
     label_color = svgwrite.rgb(0, 0, 0, "rgb")
     label_size = 72
 

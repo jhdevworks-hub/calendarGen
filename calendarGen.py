@@ -212,6 +212,9 @@ if __name__ == "__main__":
         handlers=[logging.FileHandler("debug.log"), logging.StreamHandler(sys.stdout)],
     )
     grid_anchor = (30, 150)
+    month_label_anchor = (30, 140)
+    label_color = svgwrite.rgb(0, 0, 0, "rgb")
+    label_size = 72
 
     month_names = [
         "Enero",
@@ -231,9 +234,9 @@ if __name__ == "__main__":
 
     year_day_start = 3  # 2026 starts on Thursday
     month_starting_day = year_day_start
-    for month in range(12):
+    for month_index in range(12):
         dwg = svgwrite.Drawing(
-            f"test_month_{month}.svg", size=("380mm", "265mm"), profile="full"
+            f"test_month_{month_index}.svg", size=("380mm", "265mm"), profile="full"
         )
         dwg.add(
             dwg.rect(
@@ -241,17 +244,27 @@ if __name__ == "__main__":
             )
         )
 
-        logging.info(f"Creating grid for month {month}")
+        logging.info(f"Creating grid for month {month_index}")
 
         grid_group = create_month_grid(
-            dwg,
             grid_anchor,
-            month_days[month],
+            month_days[month_index],
             month_starting_day,
-            month_days[month - 1] if (month != 0) else 31,
+            month_days[month_index - 1] if (month_index != 0) else 31,
+        )
+
+        month_label = Text(
+            month_names[month_index],
+            x=[month_label_anchor[0]],
+            y=[month_label_anchor[1]],
+            stroke=label_color,
+            fill=label_color,
+            font_size=label_size,
+            dominant_baseline="alphabetic",
         )
         dwg.add(grid_group)
-        month_starting_day = (month_starting_day + month_days[month]) % 7
+        dwg.add(month_label)
+        month_starting_day = (month_starting_day + month_days[month_index]) % 7
         dwg.save()
 
     logging.info("Done.")

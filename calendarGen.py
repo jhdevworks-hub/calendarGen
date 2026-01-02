@@ -21,7 +21,7 @@ def create_month_grid(
     day_spacing = 10
     day_size = (180, 143)
     line_color = (0, 100, 0)
-    line_thickness = 3
+    line_thickness = 1
     font_color = (0, 0, 0)
     font_size = 32
     text_offset = (5, 5)
@@ -224,8 +224,10 @@ if __name__ == "__main__":
         format="[%(levelname)s] %(message)s",
         handlers=[logging.FileHandler("debug.log"), logging.StreamHandler(sys.stdout)],
     )
+
+    # Parameters
     grid_anchor = (30, 150)
-    month_label_anchor = (30, 140)
+    month_label_anchor = (30, 100)
     label_color = svgwrite.rgb(0, 0, 0, "rgb")
     label_size = 72
 
@@ -257,7 +259,9 @@ if __name__ == "__main__":
         dwg = svgwrite.Drawing(
             f"test_month_{month_index}.svg", size=("380mm", "265mm"), profile="full"
         )
-        dwg.embed_font(name="Indie Flower", filename="fonts/IndieFlower-Regular.ttf")
+        dwg.embed_font(
+            name="Creato Display", filename="fonts/CreatoDisplay-Regular.otf"
+        )
         dwg.embed_stylesheet(stylesheet)
         dwg.add(
             dwg.rect(

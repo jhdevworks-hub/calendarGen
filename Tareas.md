@@ -1,7 +1,8 @@
 # Tareas
 - [x] Tirar numero mas a la esquina.
-- [ ] Aplicar fuente sans-serif.
-- [ ] Hacer lineas mas delgadas.
+- [x] Aplicar fuente sans-serif.
+- [x] Hacer lineas mas delgadas.
+- [x] Alinear titulo mas arriba.
 - [ ] Agregar calendaritos.
 - [ ] Agregar numero de mes.
 - [ ] Colorear feriados.

@@ -1,3 +1,4 @@
 test*.svg
 debug.log
 .venv/
+*.jpg

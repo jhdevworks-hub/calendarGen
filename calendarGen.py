@@ -24,6 +24,7 @@ def create_month_grid(
     line_thickness = 3
     font_color = (0, 0, 0)
     font_size = 32
+    text_offset = (5, 5)
 
     logging.info(
         "Input parameters:\n"
@@ -34,7 +35,9 @@ def create_month_grid(
 
     grid_group = svgwrite.container.Group()
 
-    def make_day_cell(group, grid_index, day_number, day_size, day_spacing, off_month):
+    def make_day_cell(
+        group, grid_index, day_number, day_size, day_spacing, text_offset, off_month
+    ):
         """
         Make a cell for a single day.
 
@@ -72,7 +75,6 @@ def create_month_grid(
             opacity=opacity,
         )
 
-        text_offset = (2 * day_spacing, 2 * day_spacing)
         font_full_color = svgwrite.rgb(*font_color, "rgb")
 
         number = Text(
@@ -89,7 +91,9 @@ def create_month_grid(
         group.add(line)
         group.add(number)
 
-    def make_extra_day_halfcell(group, grid_index, day_number, day_size, day_spacing):
+    def make_extra_day_halfcell(
+        group, grid_index, day_number, day_size, day_spacing, text_offset
+    ):
         """
         Make a half-day inside another day cell. Used for days that don't fit in the 5 week rows.
 
@@ -129,7 +133,6 @@ def create_month_grid(
             fill="none",
         )
 
-        text_offset = (2 * day_spacing, 2 * day_spacing)
         font_full_color = svgwrite.rgb(*font_color, "rgb")
 
         number = Text(
@@ -166,6 +169,7 @@ def create_month_grid(
             day + 1,
             day_size,
             day_spacing,
+            text_offset,
             False,
         )
 
@@ -176,7 +180,13 @@ def create_month_grid(
             days_in_previous_month - month_day_start_index, days_in_previous_month
         ):
             make_day_cell(
-                grid_group, day_index, prev_day + 1, day_size, day_spacing, True
+                grid_group,
+                day_index,
+                prev_day + 1,
+                day_size,
+                day_spacing,
+                text_offset,
+                True,
             )
             day_index += 1
 
@@ -193,6 +203,7 @@ def create_month_grid(
                     next_day,
                     day_size,
                     day_spacing,
+                    text_offset,
                     True,
                 )
                 next_month_day_index += 1
@@ -200,7 +211,9 @@ def create_month_grid(
         # Add missing month days with a diagonal line.
         index = 28
         for extra_day in range(fitting_days_in_month + 1, days_in_month + 1):
-            make_extra_day_halfcell(grid_group, index, extra_day, day_size, day_spacing)
+            make_extra_day_halfcell(
+                grid_group, index, extra_day, day_size, day_spacing, text_offset
+            )
             index += 1
     return grid_group
 

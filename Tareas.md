@@ -3,6 +3,7 @@
 - [x] Aplicar fuente sans-serif.
 - [x] Hacer lineas mas delgadas.
 - [x] Alinear titulo mas arriba.
-- [ ] Agregar calendaritos.
+- [x] Agregar calendaritos.
 - [ ] Agregar numero de mes.
 - [x] Colorear feriados.
+- [ ] Realinear todo.

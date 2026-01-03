@@ -1,13 +1,14 @@
 import svgwrite
-from svgwrite.shapes import Polyline
+from svgwrite.shapes import Polyline, Rect
 from svgwrite.text import Text
 import logging
 import sys
 
 
 class YearData:
-    def __init__(self, year):
-        self.month_names = [
+    @staticmethod
+    def month_names(index):
+        month_names = [
             "Enero",
             "Febrero",
             "Marzo",
@@ -21,6 +22,10 @@ class YearData:
             "Noviembre",
             "Diciembre",
         ]
+        return month_names[index]
+
+    def __init__(self, year):
+        self.year = year
         self.month_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
         if year % 4 == 0:
             self.month_days[1] = 29
@@ -57,6 +62,8 @@ class YearData:
 
 class MonthData:
     def __init__(self, year_data, index):
+        self.year = year_data.year
+        self.index = index
         self.n_days = year_data.month_days[index]
         self.start_index = year_data.month_starting_day_indexes[index]
         self.holidays = year_data.holidays[index]
@@ -64,6 +71,228 @@ class MonthData:
 
 def mm_to_px(length_in_mm):
     return round(3.543307 * length_in_mm)
+
+
+def create_single_minimonth(
+    minimonth_size, month_label, current_month, prev_month, next_month
+):
+    miniday_size = (minimonth_size[0] / 7, minimonth_size[1] / 6)
+    minimonth_group = svgwrite.container.Group()
+    minimonth_group.translate(300, 100)
+    border_margin = 5
+    minidays_top_margin = 2 * border_margin + miniday_size[1]
+
+    # Make border
+    border = Rect(
+        insert=(0, 0),
+        size=(minimonth_size[0], minimonth_size[1] + miniday_size[1]),
+        stroke=svgwrite.rgb(0, 0, 0, "rgb"),
+        fill="none",
+    )
+    minimonth_group.add(border)
+
+    # Fill month label
+    minilabel = Text(
+        month_label,
+        x=[0],
+        y=[0],
+        class_=("mini_calendar_label"),
+    )
+    minilabel.translate(border_margin, -border_margin)
+    minimonth_group.add(minilabel)
+
+    # Fill day labels
+    week_days = "LMMJVSD"
+    for idx, day_letter in enumerate(week_days):
+        minidaylabel = Text(
+            day_letter,
+            x=[miniday_size[0] * 0.5 + miniday_size[0] * idx],
+            y=[0],
+            dominant_baseline="hanging",
+            text_anchor="middle",
+            class_=("mini_calendar_label"),
+        )
+        minidaylabel.translate(0, border_margin)
+        minimonth_group.add(minidaylabel)
+
+    # Fill month days
+    minidays_group = svgwrite.container.Group()
+
+    n_days = current_month.n_days
+    holidays = current_month.holidays
+    for miniday_index, miniday_number in enumerate(
+        range(1, n_days + 1), current_month.start_index
+    ):
+        grid_x = (miniday_index % 7) * miniday_size[0]
+        grid_y = (miniday_index // 7) * miniday_size[1]
+        holiday = True if miniday_number in holidays else False
+        mininumber = Text(
+            str(miniday_number),
+            x=[miniday_size[0] * 0.5 + grid_x],
+            y=[grid_y],
+            # dominant_baseline="alphabetic",
+            text_anchor="middle",
+            class_=(
+                "mini_calendar_text regular-day"
+                if not holiday
+                else "mini_calendar_text holiday"
+            ),
+        )
+        minidays_group.add(mininumber)
+
+    # Fill previous month
+    n_days = prev_month.n_days
+    holidays = prev_month.holidays
+    for miniday_index, miniday_number in enumerate(
+        range(n_days - current_month.start_index + 1, n_days + 1)
+    ):
+        grid_x = (miniday_index % 7) * miniday_size[0]
+        grid_y = 0
+        holiday = True if miniday_number in holidays else False
+        mininumber = Text(
+            str(miniday_number),
+            x=[miniday_size[0] * 0.5 + grid_x],
+            y=[grid_y],
+            # dominant_baseline="alphabetic",
+            text_anchor="middle",
+            class_=(
+                "mini_calendar_text off-day regular-day"
+                if not holiday
+                else "mini_calendar_text off-day holiday"
+            ),
+        )
+        minidays_group.add(mininumber)
+
+    # Fill next month
+    holidays = next_month.holidays
+    filled_days = current_month.start_index + current_month.n_days
+    for miniday_index, miniday_number in enumerate(
+        range(1, 43 - filled_days),
+        filled_days,
+    ):
+        grid_x = (miniday_index % 7) * miniday_size[0]
+        grid_y = (miniday_index // 7) * miniday_size[1]
+        holiday = True if miniday_number in holidays else False
+        mininumber = Text(
+            str(miniday_number),
+            x=[miniday_size[0] * 0.5 + grid_x],
+            y=[grid_y],
+            text_anchor="middle",
+            class_=(
+                "mini_calendar_text off-day regular-day"
+                if not holiday
+                else "mini_calendar_text off-day holiday"
+            ),
+        )
+        minidays_group.add(mininumber)
+    minidays_group.translate(0, minidays_top_margin)
+
+    minimonth_group.add(minidays_group)
+
+    return minimonth_group
+
+
+def create_minimonth_pair(
+    minimonth_size, big_month_index, current_year, previous_year, next_year
+):
+    minimonth_pair = svgwrite.container.Group()
+
+    # Create list of 16 month datas, from November of prev year to February of next year.
+    offset_index = big_month_index + 2
+    month_datas = [
+        MonthData(previous_year, 10),
+        MonthData(previous_year, 11),
+        MonthData(current_year, 0),
+        MonthData(current_year, 1),
+        MonthData(current_year, 2),
+        MonthData(current_year, 3),
+        MonthData(current_year, 4),
+        MonthData(current_year, 5),
+        MonthData(current_year, 6),
+        MonthData(current_year, 7),
+        MonthData(current_year, 8),
+        MonthData(current_year, 9),
+        MonthData(current_year, 10),
+        MonthData(current_year, 11),
+        MonthData(next_year, 0),
+        MonthData(next_year, 1),
+    ]
+
+    # Create first minimonth (previous from big month)
+    before_first_minimonth_data = month_datas[offset_index - 2]
+    first_minimonth_data = month_datas[offset_index - 1]
+    after_first_minimonth_data = month_datas[offset_index]
+    month_label = f"{YearData.month_names(first_minimonth_data.index)} {first_minimonth_data.year}"
+    first_mini = create_single_minimonth(
+        minimonth_size,
+        month_label,
+        first_minimonth_data,
+        before_first_minimonth_data,
+        after_first_minimonth_data,
+    )
+    minimonth_pair.add(first_mini)
+
+    # Create second minimonth (next from big month)
+    before_second_minimonth_data = month_datas[offset_index]
+    second_minimonth_data = month_datas[offset_index + 1]
+    after_second_minimonth_data = month_datas[offset_index + 2]
+    month_label = f"{YearData.month_names(second_minimonth_data.index)} {second_minimonth_data.year}"
+    second_mini = create_single_minimonth(
+        minimonth_size,
+        month_label,
+        second_minimonth_data,
+        before_second_minimonth_data,
+        after_second_minimonth_data,
+    )
+    second_mini.translate(minimonth_size[0])
+    minimonth_pair.add(second_mini)
+    return minimonth_pair
+
+
+def create_minimonths(minimonth_size, current_year, previous_year, next_year):
+    minimonth_list = []
+    # Create previous December
+    minimonth_list.append(
+        create_single_minimonth(
+            minimonth_size,
+            f"{YearData.month_names(11)} {previous_year.year}",
+            MonthData(previous_year, 11),
+            MonthData(previous_year, 10),
+            MonthData(current_year, 0),
+        )
+    )
+
+    # Create current year´s minimonths
+    for month_index in range(12):
+        current_month = MonthData(current_year, month_index)
+        previous_month = (
+            MonthData(current_year, month_index - 1)
+            if month_index != 0
+            else MonthData(previous_year, 11)
+        )
+        next_month = (
+            MonthData(current_year, month_index + 1)
+            if month_index != 11
+            else MonthData(next_year, 0)
+        )
+        month_label = f"{YearData.month_names(month_index)} {current_year.year}"
+        minimonth_list.append(
+            create_single_minimonth(
+                minimonth_size, month_label, current_month, previous_month, next_month
+            )
+        )
+    # Create next January
+    minimonth_list.append(
+        create_single_minimonth(
+            minimonth_size,
+            f"{YearData.month_names(0)} {next_year.year}",
+            MonthData(next_year, 0),
+            MonthData(current_year, 11),
+            MonthData(next_year, 1),
+        )
+    )
+
+    return minimonth_list
 
 
 def create_month_grid(
@@ -130,27 +359,27 @@ def create_month_grid(
         corner_point = (cell_right, cell_bottom)
         end_point = (cell_right, cell_top + day_spacing)
 
-        opacity = 1.0 if not off_month else 0.6
+        modifiers_classes = []
+        if off_month:
+            modifiers_classes.append("off-day")
+        if holiday:
+            modifiers_classes.append("holiday")
+        else:
+            modifiers_classes.append("regular-day")
 
         line = Polyline(
             [start_point, corner_point, end_point],
-            stroke_opacity=opacity,
-            opacity=opacity,
-            class_="calendar_grid_line",
+            class_=" ".join(
+                ["calendar_grid_line"] + (["off-day"] if off_month else [])
+            ),
         )
 
         number = Text(
             str(day_number),
             x=[cell_left + text_offset[0]],
             y=[cell_top + text_offset[1]],
-            stroke_opacity=opacity,
-            fill_opacity=opacity,
             dominant_baseline="hanging",
-            class_=(
-                "calendar_grid_text regular-day"
-                if not holiday
-                else "calendar_grid_text holiday"
-            ),
+            class_=" ".join(["calendar_grid_text"] + modifiers_classes),
         )
         group.add(line)
         group.add(number)
@@ -299,6 +528,8 @@ if __name__ == "__main__":
     grid_anchor = (mm_to_px(20), mm_to_px(66))
     month_label_anchor = (mm_to_px(20), mm_to_px(40))
     label_color = svgwrite.rgb(0, 0, 0, "rgb")
+    minimonths_anchor = (mm_to_px(200), mm_to_px(23))
+    minimonth_size = (mm_to_px(50), mm_to_px(39))
 
     # Load stylesheet
     css_path = "calendar.css"
@@ -309,10 +540,13 @@ if __name__ == "__main__":
     year_2025 = YearData(2025)
     year_2026 = YearData(2026)
     year_2027 = YearData(2027)
+
+    # Prepare full page
     for month_index in range(12):
         dwg = svgwrite.Drawing(
             f"test_month_{month_index}.svg", size=("380mm", "265mm"), profile="full"
         )
+
         dwg.embed_font(
             name="Creato Display", filename="fonts/CreatoDisplay-Regular.otf"
         )
@@ -323,6 +557,14 @@ if __name__ == "__main__":
             )
         )
 
+        # Add minimonths
+        minimonth_pair = create_minimonth_pair(
+            minimonth_size, month_index, year_2026, year_2025, year_2027
+        )
+        minimonth_pair.translate(minimonths_anchor[0], minimonths_anchor[1])
+        dwg.add(minimonth_pair)
+
+        # Add main grid
         logging.info(f"Creating grid for month {month_index}")
 
         previous_month_data = (
@@ -342,7 +584,7 @@ if __name__ == "__main__":
         )
 
         month_label = Text(
-            year_2026.month_names[month_index],
+            year_2026.month_names(month_index),
             x=[month_label_anchor[0]],
             y=[month_label_anchor[1]],
             stroke=label_color,

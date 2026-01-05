@@ -1,9 +1,13 @@
-.calendar_grid_text, .calendar_label, .mini_calendar_text, .mini_calendar_label {
+.calendar_grid_text,
+.calendar_label,
+.calendar_number_label,
+.mini_calendar_text,
+.mini_calendar_label {
     font-family: "Creato Display";
 }
 
 .minicalendar {
-    text-anchor:middle
+    text-anchor: middle
 }
 
 .minicalendar_border {
@@ -33,6 +37,10 @@
 .calendar_label {
     font-size: 12mm;
     fill: rgb(0, 0, 0)
+}
+
+.calendar_number_label {
+    font-size: 4mm;
 }
 
 .holiday {

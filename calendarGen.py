@@ -542,9 +542,11 @@ if __name__ == "__main__":
     minimonth_size_from_font = (miniday_cell_size[0] * 7, miniday_cell_size[1] * 7)
 
     # Parameters
-    grid_anchor = (mm_to_px(20), mm_to_px(66))
+    content_left_edge = mm_to_px(20)
+    grid_anchor = (content_left_edge, mm_to_px(66))
     day_size = (mm_to_px(47), mm_to_px(35))
-    month_label_anchor = (mm_to_px(20), mm_to_px(38))
+    month_label_anchor = (content_left_edge, mm_to_px(38))
+    month_number_label_anchor = (content_left_edge, mm_to_px(26))
     minimonths_anchor = (mm_to_px(274), mm_to_px(23))
     minimonth_size_in_mm = minimonth_size_from_font
     minimonth_size = (
@@ -600,15 +602,23 @@ if __name__ == "__main__":
             day_size, current_month_data, previous_month_data, next_month_data
         )
         grid_group.translate(grid_anchor[0], grid_anchor[1])
+        dwg.add(grid_group)
 
+        # Add month label
         month_label = Text(
             year_2026.month_names(month_index),
             x=[month_label_anchor[0]],
             y=[month_label_anchor[1]],
             class_="calendar_label",
         )
-        dwg.add(grid_group)
+        month_number_label = Text(
+            f"{(month_index+1):02} / 2026",
+            x=[month_number_label_anchor[0]],
+            y=[month_number_label_anchor[1]],
+            class_="calendar_number_label",
+        )
         dwg.add(month_label)
+        dwg.add(month_number_label)
         dwg.save()
 
     logging.info("Done.")

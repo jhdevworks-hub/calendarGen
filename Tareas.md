@@ -4,6 +4,6 @@
 - [x] Hacer lineas mas delgadas.
 - [x] Alinear titulo mas arriba.
 - [x] Agregar calendaritos.
-- [ ] Agregar numero de mes.
+- [x] Agregar numero de mes.
 - [x] Colorear feriados.
-- [ ] Realinear todo.
+- [x] Realinear todo.

@@ -75,6 +75,10 @@ def mm_to_px(length_in_mm):
     return 3.78 * length_in_mm
 
 
+def isSunday(day_index):
+    return day_index % 7 == 6
+
+
 def getPropertyFromCSS(css, inSelector, inProperty):
     css_object = cssutils.parseString(css)
     for rule in css_object:
@@ -136,7 +140,9 @@ def create_single_minimonth(
     ):
         grid_x = (miniday_index % 7) * miniday_size[0]
         grid_y = (weekdays_offset + (miniday_index // 7)) * miniday_size[1]
-        holiday = True if miniday_number in holidays else False
+        holiday = (
+            True if miniday_number in holidays or isSunday(miniday_index) else False
+        )
         mininumber = Text(
             str(miniday_number),
             x=[miniday_size[0] * 0.5 + grid_x],
@@ -158,7 +164,7 @@ def create_single_minimonth(
     ):
         grid_x = (miniday_index % 7) * miniday_size[0]
         grid_y = weekdays_offset * miniday_size[1]
-        holiday = True if miniday_number in holidays else False
+        holiday = True if miniday_number in holidays or isSunday(miniday_index) else False
         mininumber = Text(
             str(miniday_number),
             x=[miniday_size[0] * 0.5 + grid_x],
@@ -181,7 +187,7 @@ def create_single_minimonth(
     ):
         grid_x = (miniday_index % 7) * miniday_size[0]
         grid_y = (weekdays_offset + (miniday_index // 7)) * miniday_size[1]
-        holiday = True if miniday_number in holidays else False
+        holiday = True if miniday_number in holidays or isSunday(miniday_index) else False
         mininumber = Text(
             str(miniday_number),
             x=[miniday_size[0] * 0.5 + grid_x],
@@ -430,15 +436,21 @@ def create_month_grid(
 
     # Add month days
     for day_index in range(fitting_days_in_month):
+        grid_index = day_index + month_day_start_index
+        day_number = day_index + 1
         make_day_cell(
             grid_group,
-            day_index + month_day_start_index,
-            day_index + 1,
+            grid_index,
+            day_number,
             day_size,
             day_spacing,
             number_text_offset,
             False,
-            True if (day_index + 1) in current_month.holidays else False,
+            (
+                True
+                if ((day_index + 1) in current_month.holidays) or isSunday(grid_index)
+                else False
+            ),
         )
 
     # Add previous month days
@@ -457,7 +469,11 @@ def create_month_grid(
                 day_spacing,
                 number_text_offset,
                 True,
-                True if day_number in previous_month.holidays else False,
+                (
+                    True
+                    if day_number in previous_month.holidays or isSunday(day_index)
+                    else False
+                ),
             )
 
     if full_month_fits:
@@ -476,7 +492,12 @@ def create_month_grid(
                     day_spacing,
                     number_text_offset,
                     True,
-                    True if next_day_number in next_month.holidays else False,
+                    (
+                        True
+                        if next_day_number in next_month.holidays
+                        or isSunday(next_month_day_index)
+                        else False
+                    ),
                 )
     else:
         # Add missing month days with a diagonal line.

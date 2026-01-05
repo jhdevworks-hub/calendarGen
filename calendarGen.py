@@ -76,18 +76,16 @@ def mm_to_px(length_in_mm):
 def create_single_minimonth(
     minimonth_size, month_label, current_month, prev_month, next_month
 ):
-    miniday_size = (minimonth_size[0] / 7, minimonth_size[1] / 6)
+    miniday_size = (minimonth_size[0] / 7, minimonth_size[1] / 7)
     minimonth_group = svgwrite.container.Group()
     minimonth_group.translate(300, 100)
-    border_margin = 5
-    minidays_top_margin = 2 * border_margin + miniday_size[1]
+    minidays_top_margin = miniday_size[1]
 
     # Make border
     border = Rect(
         insert=(0, 0),
-        size=(minimonth_size[0], minimonth_size[1] + miniday_size[1]),
-        stroke=svgwrite.rgb(0, 0, 0, "rgb"),
-        fill="none",
+        size=(minimonth_size[0], minimonth_size[1]),
+        class_="minicalendar_border",
     )
     minimonth_group.add(border)
 
@@ -98,40 +96,39 @@ def create_single_minimonth(
         y=[0],
         class_=("mini_calendar_label"),
     )
-    minilabel.translate(border_margin, -border_margin)
+    border_margin = 5
+    minilabel.translate(0, -border_margin)
     minimonth_group.add(minilabel)
 
-    # Fill day labels
+    minidays_group = svgwrite.container.Group(class_="minicalendar")
+    minidays_group.translate(0, minidays_top_margin)
+
+    # Fill miniweekdays labels
     week_days = "LMMJVSD"
     for idx, day_letter in enumerate(week_days):
         minidaylabel = Text(
             day_letter,
             x=[miniday_size[0] * 0.5 + miniday_size[0] * idx],
             y=[0],
-            dominant_baseline="hanging",
-            text_anchor="middle",
-            class_=("mini_calendar_label"),
+            class_=("mini_calendar_text"),
         )
-        minidaylabel.translate(0, border_margin)
-        minimonth_group.add(minidaylabel)
+        minidays_group.add(minidaylabel)
 
     # Fill month days
-    minidays_group = svgwrite.container.Group()
-
     n_days = current_month.n_days
     holidays = current_month.holidays
+    weekdays_offset = 1
     for miniday_index, miniday_number in enumerate(
         range(1, n_days + 1), current_month.start_index
     ):
         grid_x = (miniday_index % 7) * miniday_size[0]
-        grid_y = (miniday_index // 7) * miniday_size[1]
+        grid_y = (weekdays_offset + (miniday_index // 7)) * miniday_size[1]
         holiday = True if miniday_number in holidays else False
         mininumber = Text(
             str(miniday_number),
             x=[miniday_size[0] * 0.5 + grid_x],
             y=[grid_y],
             # dominant_baseline="alphabetic",
-            text_anchor="middle",
             class_=(
                 "mini_calendar_text regular-day"
                 if not holiday
@@ -147,14 +144,13 @@ def create_single_minimonth(
         range(n_days - current_month.start_index + 1, n_days + 1)
     ):
         grid_x = (miniday_index % 7) * miniday_size[0]
-        grid_y = 0
+        grid_y = weekdays_offset * miniday_size[1]
         holiday = True if miniday_number in holidays else False
         mininumber = Text(
             str(miniday_number),
             x=[miniday_size[0] * 0.5 + grid_x],
             y=[grid_y],
             # dominant_baseline="alphabetic",
-            text_anchor="middle",
             class_=(
                 "mini_calendar_text off-day regular-day"
                 if not holiday
@@ -171,13 +167,12 @@ def create_single_minimonth(
         filled_days,
     ):
         grid_x = (miniday_index % 7) * miniday_size[0]
-        grid_y = (miniday_index // 7) * miniday_size[1]
+        grid_y = (weekdays_offset + (miniday_index // 7)) * miniday_size[1]
         holiday = True if miniday_number in holidays else False
         mininumber = Text(
             str(miniday_number),
             x=[miniday_size[0] * 0.5 + grid_x],
             y=[grid_y],
-            text_anchor="middle",
             class_=(
                 "mini_calendar_text off-day regular-day"
                 if not holiday
@@ -185,7 +180,6 @@ def create_single_minimonth(
             ),
         )
         minidays_group.add(mininumber)
-    minidays_group.translate(0, minidays_top_margin)
 
     minimonth_group.add(minidays_group)
 
@@ -527,7 +521,6 @@ if __name__ == "__main__":
     # Parameters
     grid_anchor = (mm_to_px(20), mm_to_px(66))
     month_label_anchor = (mm_to_px(20), mm_to_px(40))
-    label_color = svgwrite.rgb(0, 0, 0, "rgb")
     minimonths_anchor = (mm_to_px(200), mm_to_px(23))
     minimonth_size = (mm_to_px(50), mm_to_px(39))
 
@@ -587,9 +580,6 @@ if __name__ == "__main__":
             year_2026.month_names(month_index),
             x=[month_label_anchor[0]],
             y=[month_label_anchor[1]],
-            stroke=label_color,
-            fill=label_color,
-            dominant_baseline="alphabetic",
             class_="calendar_label",
         )
         dwg.add(grid_group)

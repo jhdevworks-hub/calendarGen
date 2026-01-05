@@ -2,17 +2,26 @@
     font-family: "Creato Display";
 }
 
+.minicalendar {
+    text-anchor:middle
+}
+
+.minicalendar_border {
+    stroke: rgb(0, 0, 0);
+    fill: none
+}
+
 .calendar_grid_text {
     font-size: 5mm;
 }
 
 .mini_calendar_text {
-    font-size: 3.5mm;
+    font-size: 4mm;
 }
 
 .mini_calendar_label {
-    stroke: rgb(0, 0, 0);
-    fill: rgb(0, 0, 0)
+    fill: rgb(0, 0, 0);
+    font-size: 90%;
 }
 
 .calendar_grid_line {
@@ -22,20 +31,18 @@
 }
 
 .calendar_label {
-    font-size: 12mm
+    font-size: 12mm;
+    fill: rgb(0, 0, 0)
 }
 
 .holiday {
-    stroke: rgb(255, 0, 0);
     fill: rgb(255, 0, 0)
 }
 
 .regular-day {
-    stroke: rgb(0, 0, 0);
     fill: rgb(0, 0, 0)
 }
 
 .off-day {
-    stroke-opacity: 0.2;
     fill-opacity: 0.2
 }

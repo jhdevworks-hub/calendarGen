@@ -4,6 +4,7 @@ from svgwrite.text import Text
 import logging
 import sys
 import cssutils
+import textwrap
 
 
 class YearData:
@@ -337,7 +338,6 @@ def create_month_grid(
             str(day_number),
             x=[cell_left + text_offset[0]],
             y=[cell_top + text_offset[1]],
-            dominant_baseline="hanging",
             class_=" ".join(["calendar_grid_text"] + modifiers_classes),
         )
         group.add(line)
@@ -541,7 +541,17 @@ if __name__ == "__main__":
         mm_to_px(minimonth_size_in_mm[1]),
     )
     logging.info(f"Maximum font size (mm): {minimonth_size_in_mm[1]/7}")
-    minimonths_anchor = (content_right_edge - 2 * minimonth_size[0], content_top_edge + mm_to_px(3))
+    minimonths_anchor = (
+        content_right_edge - 2 * minimonth_size[0],
+        content_top_edge + mm_to_px(3),
+    )
+
+    # Descriptive text parameters
+    summary_anchor = (content_left_edge + month_size[0] / 2, content_top_edge)
+    description_anchor = (
+        content_left_edge + month_size[0] / 2,
+        content_top_edge + mm_to_px(5),
+    )
 
     # Prepare year data before loop
     year_2025 = YearData(2025)
@@ -592,7 +602,7 @@ if __name__ == "__main__":
         grid_group.translate(grid_anchor[0], grid_anchor[1])
         dwg.add(grid_group)
 
-        # Add month label
+        # Add month labels
         month_label = Text(
             year_2026.month_names(month_index),
             x=[month_label_anchor[0]],
@@ -607,6 +617,28 @@ if __name__ == "__main__":
         )
         dwg.add(month_label)
         dwg.add(month_number_label)
+
+        # Add descriptive text at center.
+        lorem_ipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        summary_label = Text(
+            "Lorem_ipsum",
+            x=[summary_anchor[0]],
+            y=[summary_anchor[1]],
+            class_="summary_label",
+        )
+
+        wrapped_text = textwrap.wrap(lorem_ipsum)
+        line_offset = mm_to_px(5)
+        for idx, line in enumerate(wrapped_text):
+            description_label = Text(
+                line,
+                x=[description_anchor[0]],
+                y=[description_anchor[1] + line_offset * idx],
+                class_="description_label",
+            )
+            dwg.add(description_label)
+        dwg.add(summary_label)
+
         dwg.save()
 
     logging.info("Done.")

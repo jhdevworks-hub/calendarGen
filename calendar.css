@@ -2,6 +2,8 @@
 .calendar_week_label,
 .calendar_label,
 .calendar_number_label,
+.summary_label,
+.description_label,
 .mini_calendar_text,
 .mini_calendar_label {
     font-family: "Creato Display";
@@ -27,6 +29,7 @@
 
 .calendar_grid_text {
     font-size: 5mm;
+    dominant-baseline: hanging
 }
 
 .calendar_week_label {
@@ -45,6 +48,21 @@
 }
 
 .calendar_number_label {
+    font-size: 4mm;
+}
+
+.summary_label,
+.description_label {
+    text-anchor: middle;
+    dominant-baseline: hanging
+}
+
+.summary_label {
+    font-size: 5mm;
+    font-weight: bold;
+}
+
+.description_label {
     font-size: 4mm;
 }
 

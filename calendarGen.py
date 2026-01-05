@@ -361,6 +361,8 @@ def create_month_grid(
         :param day_size: Size of the day cell, in px.
         :param day_spacing: Spacing between cells, in px.
         """
+        diagonal_spacing = 10
+        number_alignment = (mm_to_px(3),mm_to_px(3)) 
         current_row = grid_index // 7
         current_col = grid_index % 7
 
@@ -372,7 +374,6 @@ def create_month_grid(
         cell_top = current_row * y_stride
         cell_bottom = (current_row + 1) * y_stride
 
-        diagonal_spacing = 10
         start_point = (
             cell_left + day_spacing + diagonal_spacing,
             cell_bottom - diagonal_spacing,
@@ -391,12 +392,10 @@ def create_month_grid(
             str(day_number),
             x=[cell_right - text_offset[0]],
             y=[cell_bottom - text_offset[1]],
-            dominant_baseline="alphabetic",
-            text_anchor="end",
             class_=(
-                "calendar_grid_text regular-day"
+                "calendar_grid_half_day_text regular-day"
                 if not holiday
-                else "calendar_grid_text holiday"
+                else "calendar_grid_half_day_text holiday"
             ),
         )
         group.add(line)

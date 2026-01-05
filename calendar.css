@@ -1,4 +1,5 @@
 .calendar_grid_text,
+.calendar_grid_half_day_text,
 .calendar_week_label,
 .calendar_label,
 .calendar_number_label,
@@ -30,6 +31,12 @@
 .calendar_grid_text {
     font-size: 5mm;
     dominant-baseline: hanging
+}
+
+.calendar_grid_half_day_text {
+    font-size: 5mm;
+    dominant-baseline: alphabetic;
+    text-anchor: end
 }
 
 .calendar_week_label {

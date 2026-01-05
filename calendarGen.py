@@ -302,7 +302,7 @@ def create_minimonths(minimonth_size, current_year, previous_year, next_year):
 
 
 def create_month_grid(
-    grid_anchor,
+    day_size,
     current_month,
     previous_month,
     next_month,
@@ -310,11 +310,9 @@ def create_month_grid(
     """
     Create the grid for a full month, plus the previous/next months' days if they fit.
 
-    :param grid_anchor: Anchor position in the drawing, in px.
     """
     # Parameters
     day_spacing = mm_to_px(1)
-    day_size = (mm_to_px(50), mm_to_px(39))
     text_offset = (mm_to_px(1), mm_to_px(1))
 
     days_in_month = current_month.n_days
@@ -356,10 +354,10 @@ def create_month_grid(
         x_stride = day_size[0] + day_spacing
         y_stride = day_size[1] + day_spacing
 
-        cell_left = current_col * x_stride + grid_anchor[0]
-        cell_right = (current_col + 1) * x_stride + grid_anchor[0]
-        cell_top = current_row * y_stride + grid_anchor[1]
-        cell_bottom = (current_row + 1) * y_stride + grid_anchor[1]
+        cell_left = current_col * x_stride
+        cell_right = (current_col + 1) * x_stride
+        cell_top = current_row * y_stride
+        cell_bottom = (current_row + 1) * y_stride
 
         start_point = (cell_left + day_spacing, cell_bottom)
         corner_point = (cell_right, cell_bottom)
@@ -408,10 +406,10 @@ def create_month_grid(
         x_stride = day_size[0] + day_spacing
         y_stride = day_size[1] + day_spacing
 
-        cell_left = current_col * x_stride + grid_anchor[0]
-        cell_right = (current_col + 1) * x_stride + grid_anchor[0]
-        cell_top = current_row * y_stride + grid_anchor[1]
-        cell_bottom = (current_row + 1) * y_stride + grid_anchor[1]
+        cell_left = current_col * x_stride
+        cell_right = (current_col + 1) * x_stride
+        cell_top = current_row * y_stride
+        cell_bottom = (current_row + 1) * y_stride
 
         diagonal_spacing = 10
         start_point = (
@@ -536,7 +534,7 @@ if __name__ == "__main__":
         stylesheet = file.read()
     mini_font_size = getPropertyFromCSS(stylesheet, ".mini_calendar_text", "font-size")
     mini_font_size_in_mm = float(mini_font_size[:-2])
-    font_cell_factors = (1.8, 1.5)
+    font_cell_factors = (1.9, 1.4)
     miniday_cell_size = (
         mini_font_size_in_mm * font_cell_factors[0],
         mini_font_size_in_mm * font_cell_factors[1],
@@ -545,9 +543,10 @@ if __name__ == "__main__":
 
     # Parameters
     grid_anchor = (mm_to_px(20), mm_to_px(66))
-    month_label_anchor = (mm_to_px(20), mm_to_px(40))
+    day_size = (mm_to_px(47), mm_to_px(35))
+    month_label_anchor = (mm_to_px(20), mm_to_px(38))
     minimonths_anchor = (mm_to_px(274), mm_to_px(23))
-    minimonth_size_in_mm = minimonth_size_from_font  # (40, 29)
+    minimonth_size_in_mm = minimonth_size_from_font
     minimonth_size = (
         mm_to_px(minimonth_size_in_mm[0]),
         mm_to_px(minimonth_size_in_mm[1]),
@@ -598,8 +597,9 @@ if __name__ == "__main__":
         )
 
         grid_group = create_month_grid(
-            grid_anchor, current_month_data, previous_month_data, next_month_data
+            day_size, current_month_data, previous_month_data, next_month_data
         )
+        grid_group.translate(grid_anchor[0], grid_anchor[1])
 
         month_label = Text(
             year_2026.month_names(month_index),

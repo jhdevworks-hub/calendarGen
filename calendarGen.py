@@ -306,8 +306,8 @@ def create_month_grid(
         current_row = grid_index // 7
         current_col = grid_index % 7
 
-        x_stride = day_size[0] + day_spacing
-        y_stride = day_size[1] + day_spacing
+        x_stride = day_size[0]
+        y_stride = day_size[1]
 
         cell_left = current_col * x_stride
         cell_right = (current_col + 1) * x_stride
@@ -358,8 +358,8 @@ def create_month_grid(
         current_row = grid_index // 7
         current_col = grid_index % 7
 
-        x_stride = day_size[0] + day_spacing
-        y_stride = day_size[1] + day_spacing
+        x_stride = day_size[0]
+        y_stride = day_size[1]
 
         cell_left = current_col * x_stride
         cell_right = (current_col + 1) * x_stride
@@ -409,7 +409,7 @@ def create_month_grid(
     for idx, weekday in enumerate(weekdays):
         weekday_label = Text(
             weekday,
-            x=[(day_size[0] + day_spacing) * idx],
+            x=[day_size[0] * idx],
             y=[-weekday_label_y_offset],
             class_="calendar_week_label",
         )
@@ -518,7 +518,7 @@ if __name__ == "__main__":
     # Parameters
     content_left_edge = mm_to_px(20)
     grid_anchor = (content_left_edge, mm_to_px(66))
-    day_size = (mm_to_px(47), mm_to_px(35))
+    day_size = (mm_to_px(48), mm_to_px(35))
     month_label_anchor = (content_left_edge, mm_to_px(38))
     month_number_label_anchor = (content_left_edge, mm_to_px(26))
     minimonths_anchor = (mm_to_px(274), mm_to_px(23))

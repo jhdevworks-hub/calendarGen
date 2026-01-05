@@ -255,52 +255,6 @@ def create_minimonth_pair(
     return minimonth_pair
 
 
-def create_minimonths(minimonth_size, current_year, previous_year, next_year):
-    minimonth_list = []
-    # Create previous December
-    minimonth_list.append(
-        create_single_minimonth(
-            minimonth_size,
-            f"{YearData.month_names(11)} {previous_year.year}",
-            MonthData(previous_year, 11),
-            MonthData(previous_year, 10),
-            MonthData(current_year, 0),
-        )
-    )
-
-    # Create current year´s minimonths
-    for month_index in range(12):
-        current_month = MonthData(current_year, month_index)
-        previous_month = (
-            MonthData(current_year, month_index - 1)
-            if month_index != 0
-            else MonthData(previous_year, 11)
-        )
-        next_month = (
-            MonthData(current_year, month_index + 1)
-            if month_index != 11
-            else MonthData(next_year, 0)
-        )
-        month_label = f"{YearData.month_names(month_index)} {current_year.year}"
-        minimonth_list.append(
-            create_single_minimonth(
-                minimonth_size, month_label, current_month, previous_month, next_month
-            )
-        )
-    # Create next January
-    minimonth_list.append(
-        create_single_minimonth(
-            minimonth_size,
-            f"{YearData.month_names(0)} {next_year.year}",
-            MonthData(next_year, 0),
-            MonthData(current_year, 11),
-            MonthData(next_year, 1),
-        )
-    )
-
-    return minimonth_list
-
-
 def create_month_grid(
     day_size,
     current_month,
@@ -313,7 +267,8 @@ def create_month_grid(
     """
     # Parameters
     day_spacing = mm_to_px(1)
-    text_offset = (mm_to_px(1), mm_to_px(1))
+    weekday_label_y_offset = mm_to_px(1)
+    number_text_offset = (mm_to_px(1), mm_to_px(1))
 
     days_in_month = current_month.n_days
     month_day_start_index = current_month.start_index
@@ -441,6 +396,25 @@ def create_month_grid(
         group.add(line)
         group.add(number)
 
+    # Make weekday labels
+    weekdays = [
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+        "Domingo",
+    ]
+    for idx, weekday in enumerate(weekdays):
+        weekday_label = Text(
+            weekday,
+            x=[(day_size[0] + day_spacing) * idx],
+            y=[-weekday_label_y_offset],
+            class_="calendar_week_label",
+        )
+        grid_group.add(weekday_label)
+
     # Check if all month days fit in the 5 week rows.
     last_day_index = month_day_start_index + days_in_month
     full_month_fits = last_day_index < 36
@@ -462,7 +436,7 @@ def create_month_grid(
             day_index + 1,
             day_size,
             day_spacing,
-            text_offset,
+            number_text_offset,
             False,
             True if (day_index + 1) in current_month.holidays else False,
         )
@@ -481,7 +455,7 @@ def create_month_grid(
                 day_number,
                 day_size,
                 day_spacing,
-                text_offset,
+                number_text_offset,
                 True,
                 True if day_number in previous_month.holidays else False,
             )
@@ -500,7 +474,7 @@ def create_month_grid(
                     next_day_number,
                     day_size,
                     day_spacing,
-                    text_offset,
+                    number_text_offset,
                     True,
                     True if next_day_number in next_month.holidays else False,
                 )
@@ -515,7 +489,7 @@ def create_month_grid(
                 extra_day_number,
                 day_size,
                 day_spacing,
-                text_offset,
+                number_text_offset,
                 True if extra_day_number in current_month.holidays else False,
             )
     return grid_group

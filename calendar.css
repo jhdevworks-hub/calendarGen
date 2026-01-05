@@ -1,4 +1,5 @@
 .calendar_grid_text,
+.calendar_week_label,
 .calendar_label,
 .calendar_number_label,
 .mini_calendar_text,
@@ -15,10 +16,6 @@
     fill: none
 }
 
-.calendar_grid_text {
-    font-size: 5mm;
-}
-
 .mini_calendar_text {
     font-size: 3mm;
 }
@@ -26,6 +23,14 @@
 .mini_calendar_label {
     fill: rgb(0, 0, 0);
     font-size: 90%;
+}
+
+.calendar_grid_text {
+    font-size: 5mm;
+}
+
+.calendar_week_label {
+    font-size: 3mm;
 }
 
 .calendar_grid_line {

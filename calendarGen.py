@@ -5,7 +5,7 @@ import logging
 import sys
 import cssutils
 import textwrap
-
+from pathlib import Path
 
 class YearData:
     @staticmethod
@@ -579,6 +579,17 @@ if __name__ == "__main__":
     year_2026 = YearData(2026)
     year_2027 = YearData(2027)
 
+    # Load photo descriptions
+    default_summary="Lorem Ipsum"
+    default_description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    photo_text_path = Path("TextoFotos.txt")
+    photo_text_data = [(default_summary,default_description)]*12
+    if photo_text_path.exists():
+        with open(photo_text_path, "r", encoding="utf8") as file:
+            photo_text_lines = file.readlines()
+        for i in range(12):
+            photo_text_data[i] = [photo_text_lines[2*i],photo_text_lines[2*i+1]]
+
     # Prepare full page
     for month_index in range(12):
         dwg = svgwrite.Drawing(
@@ -639,16 +650,15 @@ if __name__ == "__main__":
         dwg.add(month_label)
         dwg.add(month_number_label)
 
-        # Add descriptive text at center.
-        lorem_ipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        # Add photo summary and description text at center.
         summary_label = Text(
-            "Lorem_ipsum",
+            photo_text_data[month_index][0],
             x=[summary_anchor[0]],
             y=[summary_anchor[1]],
             class_="summary_label",
         )
 
-        wrapped_text = textwrap.wrap(lorem_ipsum)
+        wrapped_text = textwrap.wrap(photo_text_data[month_index][1])
         line_offset = mm_to_px(5)
         for idx, line in enumerate(wrapped_text):
             description_label = Text(

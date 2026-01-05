@@ -3,6 +3,7 @@ from svgwrite.shapes import Polyline, Rect
 from svgwrite.text import Text
 import logging
 import sys
+import cssutils
 
 
 class YearData:
@@ -70,7 +71,19 @@ class MonthData:
 
 
 def mm_to_px(length_in_mm):
-    return round(3.543307 * length_in_mm)
+    return 3.78 * length_in_mm
+
+
+def getPropertyFromCSS(css, inSelector, inProperty):
+    css_object = cssutils.parseString(css)
+    for rule in css_object:
+        if rule.type == rule.STYLE_RULE:
+            selectorList = rule.selectorList
+            for selectorEntry in selectorList:
+                if selectorEntry.selectorText == inSelector:
+                    for propertyEntry in rule.style:
+                        if propertyEntry.name == inProperty:
+                            return propertyEntry.value
 
 
 def create_single_minimonth(
@@ -78,13 +91,13 @@ def create_single_minimonth(
 ):
     miniday_size = (minimonth_size[0] / 7, minimonth_size[1] / 7)
     minimonth_group = svgwrite.container.Group()
-    minimonth_group.translate(300, 100)
-    minidays_top_margin = miniday_size[1]
+    border_percentage = 0.3
+    border_y_margin = border_percentage * miniday_size[1]
 
     # Make border
     border = Rect(
         insert=(0, 0),
-        size=(minimonth_size[0], minimonth_size[1]),
+        size=(minimonth_size[0], minimonth_size[1] + border_y_margin),
         class_="minicalendar_border",
     )
     minimonth_group.add(border)
@@ -96,12 +109,11 @@ def create_single_minimonth(
         y=[0],
         class_=("mini_calendar_label"),
     )
-    border_margin = 5
-    minilabel.translate(0, -border_margin)
+    minilabel.translate(0, -border_y_margin)
     minimonth_group.add(minilabel)
 
     minidays_group = svgwrite.container.Group(class_="minicalendar")
-    minidays_group.translate(0, minidays_top_margin)
+    minidays_group.translate(0, miniday_size[1])
 
     # Fill miniweekdays labels
     week_days = "LMMJVSD"
@@ -309,7 +321,7 @@ def create_month_grid(
     month_day_start_index = current_month.start_index
     days_in_previous_month = previous_month.n_days
 
-    logging.info(
+    logging.debug(
         "Input parameters:\n"
         f"days_in_month: {days_in_month}\n"
         f"month_day_start: {month_day_start_index}\n"
@@ -440,7 +452,7 @@ def create_month_grid(
         fitting_days_in_month = days_in_month
     else:
         fitting_days_in_month = 35 - month_day_start_index
-        logging.info(
+        logging.debug(
             f"Month did not fit, making cells until day {fitting_days_in_month}"
         )
 
@@ -518,16 +530,29 @@ if __name__ == "__main__":
         handlers=[logging.FileHandler("debug.log"), logging.StreamHandler(sys.stdout)],
     )
 
-    # Parameters
-    grid_anchor = (mm_to_px(20), mm_to_px(66))
-    month_label_anchor = (mm_to_px(20), mm_to_px(40))
-    minimonths_anchor = (mm_to_px(200), mm_to_px(23))
-    minimonth_size = (mm_to_px(50), mm_to_px(39))
-
     # Load stylesheet
     css_path = "calendar.css"
     with open(css_path, "r") as file:
         stylesheet = file.read()
+    mini_font_size = getPropertyFromCSS(stylesheet, ".mini_calendar_text", "font-size")
+    mini_font_size_in_mm = float(mini_font_size[:-2])
+    font_cell_factors = (1.8, 1.5)
+    miniday_cell_size = (
+        mini_font_size_in_mm * font_cell_factors[0],
+        mini_font_size_in_mm * font_cell_factors[1],
+    )
+    minimonth_size_from_font = (miniday_cell_size[0] * 7, miniday_cell_size[1] * 7)
+
+    # Parameters
+    grid_anchor = (mm_to_px(20), mm_to_px(66))
+    month_label_anchor = (mm_to_px(20), mm_to_px(40))
+    minimonths_anchor = (mm_to_px(274), mm_to_px(23))
+    minimonth_size_in_mm = minimonth_size_from_font  # (40, 29)
+    minimonth_size = (
+        mm_to_px(minimonth_size_in_mm[0]),
+        mm_to_px(minimonth_size_in_mm[1]),
+    )
+    logging.info(f"Maximum font size (mm): {minimonth_size_in_mm[1]/7}")
 
     # Prepare year data before loop
     year_2025 = YearData(2025)

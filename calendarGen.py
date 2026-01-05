@@ -515,19 +515,33 @@ if __name__ == "__main__":
     )
     minimonth_size_from_font = (miniday_cell_size[0] * 7, miniday_cell_size[1] * 7)
 
-    # Parameters
+    # Grid parameters
+    content_top_edge = mm_to_px(20)
     content_left_edge = mm_to_px(20)
+    month_size = (mm_to_px(336), mm_to_px(245))
     grid_anchor = (content_left_edge, mm_to_px(66))
-    day_size = (mm_to_px(48), mm_to_px(35))
-    month_label_anchor = (content_left_edge, mm_to_px(38))
-    month_number_label_anchor = (content_left_edge, mm_to_px(26))
-    minimonths_anchor = (mm_to_px(274), mm_to_px(23))
+    content_right_edge = content_left_edge + month_size[0]
+    day_size = (month_size[0] / 7, month_size[1] / 7)
+
+    # Month label parameters
+    labels_margin_from_edge = mm_to_px(2)
+    month_number_label_anchor = (
+        content_left_edge,
+        content_top_edge + labels_margin_from_edge + mm_to_px(4),
+    )
+    month_label_anchor = (
+        content_left_edge,
+        content_top_edge + labels_margin_from_edge + mm_to_px(16),
+    )
+
+    # Minimonth parameters
     minimonth_size_in_mm = minimonth_size_from_font
     minimonth_size = (
         mm_to_px(minimonth_size_in_mm[0]),
         mm_to_px(minimonth_size_in_mm[1]),
     )
     logging.info(f"Maximum font size (mm): {minimonth_size_in_mm[1]/7}")
+    minimonths_anchor = (content_right_edge - 2 * minimonth_size[0], content_top_edge + mm_to_px(3))
 
     # Prepare year data before loop
     year_2025 = YearData(2025)

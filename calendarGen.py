@@ -570,7 +570,7 @@ if __name__ == "__main__":
     summary_anchor = (content_left_edge + month_size[0] / 2, content_top_edge)
     description_anchor = (
         content_left_edge + month_size[0] / 2,
-        content_top_edge + mm_to_px(5),
+        content_top_edge + mm_to_px(6),
     )
 
     # Prepare year data before loop
@@ -657,7 +657,7 @@ if __name__ == "__main__":
             class_="summary_label",
         )
 
-        wrapped_text = textwrap.wrap(photo_text_data[month_index][1])
+        wrapped_text = textwrap.wrap(photo_text_data[month_index][1],width=90)
         line_offset = mm_to_px(5)
         for idx, line in enumerate(wrapped_text):
             description_label = Text(

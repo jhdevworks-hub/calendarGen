@@ -7,6 +7,7 @@ import cssutils
 import textwrap
 from pathlib import Path
 
+
 class YearData:
     @staticmethod
     def month_names(index):
@@ -164,7 +165,9 @@ def create_single_minimonth(
     ):
         grid_x = (miniday_index % 7) * miniday_size[0]
         grid_y = weekdays_offset * miniday_size[1]
-        holiday = True if miniday_number in holidays or isSunday(miniday_index) else False
+        holiday = (
+            True if miniday_number in holidays or isSunday(miniday_index) else False
+        )
         mininumber = Text(
             str(miniday_number),
             x=[miniday_size[0] * 0.5 + grid_x],
@@ -187,7 +190,9 @@ def create_single_minimonth(
     ):
         grid_x = (miniday_index % 7) * miniday_size[0]
         grid_y = (weekdays_offset + (miniday_index // 7)) * miniday_size[1]
-        holiday = True if miniday_number in holidays or isSunday(miniday_index) else False
+        holiday = (
+            True if miniday_number in holidays or isSunday(miniday_index) else False
+        )
         mininumber = Text(
             str(miniday_number),
             x=[miniday_size[0] * 0.5 + grid_x],
@@ -362,7 +367,7 @@ def create_month_grid(
         :param day_spacing: Spacing between cells, in px.
         """
         diagonal_spacing = 10
-        number_alignment = (mm_to_px(3),mm_to_px(3)) 
+        number_alignment = (mm_to_px(3), mm_to_px(3))
         current_row = grid_index // 7
         current_col = grid_index % 7
 
@@ -579,15 +584,15 @@ if __name__ == "__main__":
     year_2027 = YearData(2027)
 
     # Load photo descriptions
-    default_summary="Lorem Ipsum"
+    default_summary = "Lorem Ipsum"
     default_description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
     photo_text_path = Path("TextoFotos.txt")
-    photo_text_data = [(default_summary,default_description)]*12
+    photo_text_data = [(default_summary, default_description)] * 12
     if photo_text_path.exists():
         with open(photo_text_path, "r", encoding="utf8") as file:
             photo_text_lines = file.readlines()
         for i in range(12):
-            photo_text_data[i] = [photo_text_lines[2*i],photo_text_lines[2*i+1]]
+            photo_text_data[i] = [photo_text_lines[2 * i], photo_text_lines[2 * i + 1]]
 
     # Prepare full page
     for month_index in range(12):
@@ -657,7 +662,7 @@ if __name__ == "__main__":
             class_="summary_label",
         )
 
-        wrapped_text = textwrap.wrap(photo_text_data[month_index][1],width=90)
+        wrapped_text = textwrap.wrap(photo_text_data[month_index][1], width=90)
         line_offset = mm_to_px(5)
         for idx, line in enumerate(wrapped_text):
             description_label = Text(

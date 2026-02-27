@@ -10,6 +10,7 @@
     font-family: "Creato Display";
 }
 
+/*Elements in top right.*/
 .minicalendar {
     text-anchor: middle
 }
@@ -20,27 +21,29 @@
 }
 
 .mini_calendar_text {
-    font-size: 3mm;
+    font-size: 4mm;
 }
 
 .mini_calendar_label {
     fill: rgb(0, 0, 0);
-    font-size: 90%;
+    font-size: 5mm;
 }
 
+/*Elements in month grid - bottom center.*/
+
 .calendar_grid_text {
-    font-size: 5mm;
+    font-size: 7mm;
     dominant-baseline: hanging
 }
 
 .calendar_grid_half_day_text {
-    font-size: 5mm;
+    font-size: 7mm;
     dominant-baseline: alphabetic;
     text-anchor: end
 }
 
 .calendar_week_label {
-    font-size: 3mm;
+    font-size: 10mm;
 }
 
 .calendar_grid_line {
@@ -49,15 +52,18 @@
     fill: none
 }
 
+/*Elements at top left of calendar*/
 .calendar_label {
-    font-size: 12mm;
-    fill: rgb(0, 0, 0)
+    font-size: 14mm;
+    fill: rgb(0, 0, 0);
+    dominant-baseline: hanging
 }
 
 .calendar_number_label {
-    font-size: 4mm;
+    font-size: 6mm;
 }
 
+/*Elements at top center of calendar*/
 .summary_label,
 .description_label {
     text-anchor: middle;
@@ -65,14 +71,15 @@
 }
 
 .summary_label {
-    font-size: 5mm;
+    font-size: 6mm;
     font-weight: bold;
 }
 
 .description_label {
-    font-size: 4mm;
+    font-size: 5mm;
 }
 
+/*Day colors*/
 .holiday {
     fill: rgb(255, 0, 0)
 }

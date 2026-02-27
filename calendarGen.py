@@ -76,6 +76,10 @@ def mm_to_px(length_in_mm):
     return 3.78 * length_in_mm
 
 
+def px_to_mm(length_in_px):
+    return length_in_px / 3.78
+
+
 def isSunday(day_index):
     return day_index % 7 == 6
 
@@ -278,9 +282,17 @@ def create_month_grid(
 
     """
     # Parameters
-    day_spacing = mm_to_px(1)
-    weekday_label_y_offset = mm_to_px(1)
-    number_text_offset = (mm_to_px(1), mm_to_px(1))
+    month_grid_parameters = {
+        "day_spacing_mm": 1,
+        "weekday_label_y_offset_mm": 1,
+        "number_text_offset_mm": 2,
+    }
+    day_spacing = mm_to_px(month_grid_parameters["day_spacing_mm"])
+    weekday_label_y_offset = mm_to_px(month_grid_parameters["weekday_label_y_offset_mm"])
+    number_text_offset = (
+        mm_to_px(month_grid_parameters["number_text_offset_mm"]),
+        mm_to_px(month_grid_parameters["number_text_offset_mm"]),
+    )
 
     days_in_month = current_month.n_days
     month_day_start_index = current_month.start_index
@@ -539,24 +551,67 @@ if __name__ == "__main__":
         mini_font_size_in_mm * font_cell_factors[1],
     )
     minimonth_size_from_font = (miniday_cell_size[0] * 7, miniday_cell_size[1] * 7)
+    logging.info(
+        f"Minimonth size (mm): {px_to_mm(minimonth_size_from_font[0])} x {px_to_mm(minimonth_size_from_font[1])} (calculated from font size {mini_font_size})"
+    )
 
     # Grid parameters
-    content_top_edge = mm_to_px(20)
-    content_left_edge = mm_to_px(20)
-    month_size = (mm_to_px(336), mm_to_px(245))
-    grid_anchor = (content_left_edge, mm_to_px(66))
-    content_right_edge = content_left_edge + month_size[0]
-    day_size = (month_size[0] / 7, month_size[1] / 7)
+    parameters = {
+        "page_size_mm": (488, 330),
+        "month_relative_size": (0.95, 0.7),
+        "content_top_edge_mm": 20,
+        "month_number_label_margin_mm": 0,
+        "month_labels_vertical_gap_mm": 2,
+        "summary_to_description_gap_mm": 2,
+    }
+    page_size_in_mm = parameters["page_size_mm"]
+    page_size_in_px = (mm_to_px(page_size_in_mm[0]), mm_to_px(page_size_in_mm[1]))
+    month_size_in_mm = (
+        page_size_in_mm[0] * parameters["month_relative_size"][0],
+        page_size_in_mm[1] * parameters["month_relative_size"][1],
+    )
+    month_size_in_px = (
+        mm_to_px(month_size_in_mm[0]),
+        mm_to_px(month_size_in_mm[1]),
+    )
+    content_top_edge_in_mm = parameters["content_top_edge_mm"]
+    content_top_edge = mm_to_px(content_top_edge_in_mm)
+    content_left_edge = (page_size_in_px[0] - month_size_in_px[0]) / 2
+    grid_anchor = (
+        content_left_edge,
+        mm_to_px(page_size_in_mm[0] * 0.17),
+    )  # TODO: Calculate from bottom edge.
+    content_right_edge = content_left_edge + month_size_in_px[0]
+    day_size = (month_size_in_px[0] / 7, month_size_in_px[1] / 5)
+
+    logging.info(f"Page size (mm): {page_size_in_mm[0]} x {page_size_in_mm[1]}")
+    logging.info(f"Month size (mm): {month_size_in_mm[0]} x {month_size_in_mm[1]}")
+    logging.info(
+        f"Day size (mm): {px_to_mm(day_size[0])} x {px_to_mm(day_size[1])} (calculated from month size)"
+    )
+    logging.info(f"Top edge (mm): {content_top_edge_in_mm}")
+    logging.info(
+        f"Left edge (mm): {px_to_mm(content_left_edge)} (calculated from month and page size)"
+    )
 
     # Month label parameters
-    labels_margin_from_edge = mm_to_px(2)
+    calendar_number_label_size = getPropertyFromCSS(
+        stylesheet, ".calendar_number_label", "font-size"
+    )
+    calendar_number_label_size_in_mm = float(calendar_number_label_size[:-2])
+    logging.info(
+        f"Calendar number label size (mm): {calendar_number_label_size_in_mm} (from CSS)"
+    )
     month_number_label_anchor = (
         content_left_edge,
-        content_top_edge + labels_margin_from_edge + mm_to_px(4),
+        content_top_edge
+        + mm_to_px(calendar_number_label_size_in_mm)
+        + mm_to_px(parameters["month_number_label_margin_mm"]),
     )
     month_label_anchor = (
         content_left_edge,
-        content_top_edge + labels_margin_from_edge + mm_to_px(16),
+        month_number_label_anchor[1]
+        + mm_to_px(parameters["month_labels_vertical_gap_mm"]),
     )
 
     # Minimonth parameters
@@ -566,16 +621,24 @@ if __name__ == "__main__":
         mm_to_px(minimonth_size_in_mm[1]),
     )
     logging.info(f"Maximum font size (mm): {minimonth_size_in_mm[1]/7}")
+    mini_calendar_label_font_size = getPropertyFromCSS(stylesheet, ".mini_calendar_label", "font-size")
+    mini_calendar_label_font_size_in_mm = float(mini_calendar_label_font_size[:-2])
     minimonths_anchor = (
         content_right_edge - 2 * minimonth_size[0],
-        content_top_edge + mm_to_px(3),
+        content_top_edge + mm_to_px(mini_calendar_label_font_size_in_mm),
     )
 
     # Descriptive text parameters
-    summary_anchor = (content_left_edge + month_size[0] / 2, content_top_edge)
+    center_offset = mm_to_px(20)
+    summary_anchor = (
+        content_left_edge + month_size_in_px[0] / 2 - center_offset,
+        content_top_edge,
+    )
+    summary_font_size = getPropertyFromCSS(stylesheet, ".summary_label", "font-size")
+    summary_font_size_in_mm = float(summary_font_size[:-2])
     description_anchor = (
-        content_left_edge + month_size[0] / 2,
-        content_top_edge + mm_to_px(6),
+        content_left_edge + month_size_in_px[0] / 2 - center_offset,
+        content_top_edge + mm_to_px(summary_font_size_in_mm + parameters["summary_to_description_gap_mm"]),
     )
 
     # Prepare year data before loop
@@ -596,8 +659,11 @@ if __name__ == "__main__":
 
     # Prepare full page
     for month_index in range(12):
+        file_stem = f"test_month_{month_index}"
         dwg = svgwrite.Drawing(
-            f"test_month_{month_index}.svg", size=("380mm", "265mm"), profile="full"
+            f"{file_stem}.svg",
+            size=(f"{page_size_in_mm[0]}mm", f"{page_size_in_mm[1]}mm"),
+            profile="full",
         )
 
         dwg.embed_font(

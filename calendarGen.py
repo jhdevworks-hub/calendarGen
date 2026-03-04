@@ -7,6 +7,29 @@ import cssutils
 import textwrap
 from pathlib import Path
 
+calendar_standard = "488x330"  # "488x330" or "A3"
+parameters_488x330 = {
+    "page_size_mm": (488, 330),
+    "month_relative_size": (0.95, 0.7),
+    "content_top_edge_mm": 20,
+    "month_number_label_margin_mm": 0,
+    "month_labels_vertical_gap_mm": 2,
+    "summary_to_description_gap_mm": 2,
+    "center_offset_mm": 20,
+    "description_line_offset_mm": 5,
+}
+
+parameters_A3 = {
+    "page_size_mm": (297, 210),
+    "month_relative_size": (0.95, 0.7),
+    "content_top_edge_mm": 20,
+    "month_number_label_margin_mm": 0,
+    "month_labels_vertical_gap_mm": 2,
+    "summary_to_description_gap_mm": 2,
+    "center_offset_mm": 20,
+    "description_line_offset_mm": 5,
+}
+
 
 class YearData:
     @staticmethod
@@ -288,7 +311,9 @@ def create_month_grid(
         "number_text_offset_mm": 2,
     }
     day_spacing = mm_to_px(month_grid_parameters["day_spacing_mm"])
-    weekday_label_y_offset = mm_to_px(month_grid_parameters["weekday_label_y_offset_mm"])
+    weekday_label_y_offset = mm_to_px(
+        month_grid_parameters["weekday_label_y_offset_mm"]
+    )
     number_text_offset = (
         mm_to_px(month_grid_parameters["number_text_offset_mm"]),
         mm_to_px(month_grid_parameters["number_text_offset_mm"]),
@@ -379,7 +404,6 @@ def create_month_grid(
         :param day_spacing: Spacing between cells, in px.
         """
         diagonal_spacing = 10
-        number_alignment = (mm_to_px(3), mm_to_px(3))
         current_row = grid_index // 7
         current_col = grid_index % 7
 
@@ -540,7 +564,7 @@ if __name__ == "__main__":
     )
 
     # Load stylesheet
-    css_path = "calendar.css"
+    css_path = f"calendar_{calendar_standard}.css"
     with open(css_path, "r") as file:
         stylesheet = file.read()
     mini_font_size = getPropertyFromCSS(stylesheet, ".mini_calendar_text", "font-size")
@@ -556,14 +580,7 @@ if __name__ == "__main__":
     )
 
     # Grid parameters
-    parameters = {
-        "page_size_mm": (488, 330),
-        "month_relative_size": (0.95, 0.7),
-        "content_top_edge_mm": 20,
-        "month_number_label_margin_mm": 0,
-        "month_labels_vertical_gap_mm": 2,
-        "summary_to_description_gap_mm": 2,
-    }
+    parameters = parameters_488x330 if calendar_standard == "488x330" else parameters_A3
     page_size_in_mm = parameters["page_size_mm"]
     page_size_in_px = (mm_to_px(page_size_in_mm[0]), mm_to_px(page_size_in_mm[1]))
     month_size_in_mm = (
@@ -621,7 +638,9 @@ if __name__ == "__main__":
         mm_to_px(minimonth_size_in_mm[1]),
     )
     logging.info(f"Maximum font size (mm): {minimonth_size_in_mm[1]/7}")
-    mini_calendar_label_font_size = getPropertyFromCSS(stylesheet, ".mini_calendar_label", "font-size")
+    mini_calendar_label_font_size = getPropertyFromCSS(
+        stylesheet, ".mini_calendar_label", "font-size"
+    )
     mini_calendar_label_font_size_in_mm = float(mini_calendar_label_font_size[:-2])
     minimonths_anchor = (
         content_right_edge - 2 * minimonth_size[0],
@@ -629,7 +648,7 @@ if __name__ == "__main__":
     )
 
     # Descriptive text parameters
-    center_offset = mm_to_px(20)
+    center_offset = mm_to_px(parameters["center_offset_mm"])
     summary_anchor = (
         content_left_edge + month_size_in_px[0] / 2 - center_offset,
         content_top_edge,
@@ -638,7 +657,10 @@ if __name__ == "__main__":
     summary_font_size_in_mm = float(summary_font_size[:-2])
     description_anchor = (
         content_left_edge + month_size_in_px[0] / 2 - center_offset,
-        content_top_edge + mm_to_px(summary_font_size_in_mm + parameters["summary_to_description_gap_mm"]),
+        content_top_edge
+        + mm_to_px(
+            summary_font_size_in_mm + parameters["summary_to_description_gap_mm"]
+        ),
     )
 
     # Prepare year data before loop
@@ -729,7 +751,7 @@ if __name__ == "__main__":
         )
 
         wrapped_text = textwrap.wrap(photo_text_data[month_index][1], width=90)
-        line_offset = mm_to_px(5)
+        line_offset = mm_to_px(parameters["description_line_offset_mm"])
         for idx, line in enumerate(wrapped_text):
             description_label = Text(
                 line,

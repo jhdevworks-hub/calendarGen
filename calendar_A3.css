@@ -21,29 +21,29 @@
 }
 
 .mini_calendar_text {
-    font-size: 4mm;
+    font-size: 2.8mm;
 }
 
 .mini_calendar_label {
     fill: rgb(0, 0, 0);
-    font-size: 5mm;
+    font-size: 4mm;
 }
 
 /*Elements in month grid - bottom center.*/
 
 .calendar_grid_text {
-    font-size: 7mm;
+    font-size: 5mm;
     dominant-baseline: hanging
 }
 
 .calendar_grid_half_day_text {
-    font-size: 7mm;
+    font-size: 5mm;
     dominant-baseline: alphabetic;
     text-anchor: end
 }
 
 .calendar_week_label {
-    font-size: 10mm;
+    font-size: 6mm;
 }
 
 .calendar_grid_line {
@@ -54,13 +54,13 @@
 
 /*Elements at top left of calendar*/
 .calendar_label {
-    font-size: 14mm;
+    font-size: 10mm;
     fill: rgb(0, 0, 0);
     dominant-baseline: hanging
 }
 
 .calendar_number_label {
-    font-size: 6mm;
+    font-size: 4mm;
 }
 
 /*Elements at top center of calendar*/
@@ -71,12 +71,12 @@
 }
 
 .summary_label {
-    font-size: 6mm;
+    font-size: 4mm;
     font-weight: bold;
 }
 
 .description_label {
-    font-size: 5mm;
+    font-size: 3.5mm;
 }
 
 /*Day colors*/

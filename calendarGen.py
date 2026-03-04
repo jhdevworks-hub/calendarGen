@@ -7,7 +7,7 @@ import cssutils
 import textwrap
 from pathlib import Path
 
-calendar_standard = "488x330"  # "488x330" or "A3"
+calendar_standard = "A3"  # "488x330" or "A3"
 parameters_488x330 = {
     "page_size_mm": (488, 330),
     "month_relative_size": (0.95, 0.7),
@@ -22,12 +22,12 @@ parameters_488x330 = {
 parameters_A3 = {
     "page_size_mm": (297, 210),
     "month_relative_size": (0.95, 0.7),
-    "content_top_edge_mm": 20,
+    "content_top_edge_mm": 10,
     "month_number_label_margin_mm": 0,
     "month_labels_vertical_gap_mm": 2,
     "summary_to_description_gap_mm": 2,
-    "center_offset_mm": 20,
-    "description_line_offset_mm": 5,
+    "center_offset_mm": 10,
+    "description_line_offset_mm": 4,
 }
 
 
